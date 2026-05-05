@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 249, 250, 251;
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  font-family: 'Inter', sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c7c7c7;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* FullCalendar custom styles */
+.fc {
+  font-family: 'Inter', sans-serif;
+}
+
+.fc .fc-button {
+  @apply bg-primary-500 border-primary-500 text-white font-medium;
+}
+
+.fc .fc-button:hover {
+  @apply bg-primary-600 border-primary-600;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  @apply bg-primary-700 border-primary-700;
+}
+
+.fc .fc-event {
+  @apply cursor-pointer;
+}
+
+.fc .fc-daygrid-day-number {
+  @apply text-gray-600 font-medium;
+}
+
+.fc .fc-col-header-cell-cushion {
+  @apply text-gray-500 font-medium uppercase text-xs;
+}

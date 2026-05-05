@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  password      String
+  role          String    @default("MEMBER") // ADMIN, MEMBER, CLIENT
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  member        Member?
+  client        Client?
+  notifications Notification[]
+}
+
+model Orchestra {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  logo          String?
+  contactEmail  String?
+  contactPhone  String?
+  address       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  events        Event[]
+}
+
+model Member {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instrument       String
+  position         String?
+  hourlyRate       Float     @default(0)
+  bio              String?
+  emergencyContact String?
+  emergencyPhone   String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  bookings         Booking[]
+  availabilities   Availability[]
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  orchestraId String
+  orchestra   Orchestra @relation(fields: [orchestraId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  eventType   String    @default("CONCERT") // CONCERT, REHEARSAL, PERFORMANCE, OTHER
+  location    String?
+  startTime   DateTime
+  endTime     DateTime
+  status      String    @default("SCHEDULED") // SCHEDULED, CONFIRMED, CANCELLED, COMPLETED
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  bookings    Booking[]
+  repertoires Repertoire[]
+}
+
+model Repertoire {
+  id           String   @id @default(cuid())
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  title        String
+  composer     String?
+  duration     Int?     // in minutes
+  arrangement  String?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Booking {
+  id             String   @id @default(cuid())
+  eventId        String
+  event          Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  memberId       String
+  member         Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  status         String   @default("PENDING") // PENDING, CONFIRMED, DECLINED, CANCELLED
+  paymentStatus  String   @default("UNPAID") // UNPAID, PARTIAL, PAID
+  paymentAmount  Float    @default(0)
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  payments       Payment[]
+}
+
+model Client {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company       String?
+  contactPerson String?
+  phone         String?
+  address       String?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  bookingId    String
+  booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount        Float
+  paymentDate   DateTime @default(now())
+  paymentMethod String   @default("CASH") // CASH, BANK_TRANSFER, CARD, OTHER
+  reference     String?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       String   @default("SYSTEM") // BOOKING, EVENT, PAYMENT, AVAILABILITY, SYSTEM
+  title      String
+  message    String
+  read       Boolean  @default(false)
+  relatedId  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Availability {
+  id        String   @id @default(cuid())
+  memberId  String
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  date      DateTime
+  status    String   @default("AVAILABLE") // AVAILABLE, UNAVAILABLE, TENTATIVE
+  reason    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([memberId, date])
+}
