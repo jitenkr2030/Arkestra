@@ -3,6 +3,24 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if DATABASE_URL is configured
+    const databaseUrl = process.env.DATABASE_URL
+    if (!databaseUrl) {
+      // Return default stats when no database is configured
+      return NextResponse.json({
+        totalEvents: 0,
+        upcomingEvents: 0,
+        totalBookings: 0,
+        pendingBookings: 0,
+        totalMembers: 0,
+        totalClients: 0,
+        totalRevenue: 0,
+        pendingRevenue: 0,
+        unreadNotifications: 0,
+        isConfigured: false,
+      })
+    }
+
     const stats = await Promise.all([
       // Total events
       prisma.event.count(),
@@ -45,9 +63,23 @@ export async function GET(request: NextRequest) {
       totalRevenue: stats[6]._sum.paymentAmount || 0,
       pendingRevenue: stats[7]._sum.paymentAmount || 0,
       unreadNotifications: stats[8],
+      isConfigured: true,
     })
   } catch (error) {
     console.error('Error fetching stats:', error)
-    return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 })
+    // Return safe defaults on error
+    return NextResponse.json({
+      totalEvents: 0,
+      upcomingEvents: 0,
+      totalBookings: 0,
+      pendingBookings: 0,
+      totalMembers: 0,
+      totalClients: 0,
+      totalRevenue: 0,
+      pendingRevenue: 0,
+      unreadNotifications: 0,
+      isConfigured: false,
+      error: 'Database not available',
+    })
   }
 }
