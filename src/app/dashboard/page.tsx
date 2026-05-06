@@ -1,5 +1,5 @@
 'use client'
-
+export const fetchCache = "force-no-store";
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import AppLayout from '@/components/AppLayout'
