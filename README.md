@@ -1,6 +1,6 @@
 # Arkestra - Orchestra Management Platform
 
-A comprehensive full-stack web application for managing orchestras, events, members, bookings, repertoire, and finances. Built with Next.js 14, Prisma, and SQLite.
+A comprehensive full-stack web application for managing orchestras, events, members, bookings, repertoire, and finances. Built with Next.js 14, Prisma, and SQLite/Turso.
 
 ## Features
 
@@ -25,7 +25,7 @@ A comprehensive full-stack web application for managing orchestras, events, memb
 
 - **Frontend**: Next.js 14 (App Router), React, TailwindCSS
 - **Backend**: Next.js API Routes
-- **Database**: SQLite with Prisma ORM
+- **Database**: SQLite/Turso with Prisma ORM
 - **Authentication**: NextAuth.js
 - **Calendar**: FullCalendar
 - **Icons**: Lucide React
@@ -37,8 +37,9 @@ A comprehensive full-stack web application for managing orchestras, events, memb
 
 - Node.js 18.x or later
 - npm or yarn
+- Turso account (for production deployment)
 
-### Installation
+### Local Installation
 
 1. Clone the repository:
    ```bash
@@ -72,29 +73,96 @@ A comprehensive full-stack web application for managing orchestras, events, memb
 
 6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Build for Production
-
-```bash
-npm run build
-npm start
-```
-
-### Lint Code
-
-```bash
-npm run lint
-```
-
-## Default Login Credentials
+### Default Login Credentials
 
 After seeding the database, use these credentials:
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@orchestra.com | admin123 |
-| Member | john@example.com | member123 |
-| Member | jane@example.com | member123 |
-| Client | client@example.com | client123 |
+| Admin | admin@symphonyhub.com | password123 |
+| Member | violinist@symphonyhub.com | password123 |
+| Member | cellist@symphonyhub.com | password123 |
+| Member | pianist@symphonyhub.com | password123 |
+| Member | flutist@symphonyhub.com | password123 |
+| Client | client1@company.com | password123 |
+| Client | client2@enterprise.com | password123 |
+
+## Deployment
+
+### Vercel + Turso (Recommended)
+
+#### Step 1: Create Turso Database
+
+1. Sign up at [turso.tech](https://turso.tech)
+2. Install Turso CLI:
+   ```bash
+   brew install tursodatabase/tap/turso
+   ```
+3. Create a database:
+   ```bash
+   turso db create arkestra-db
+   ```
+4. Get the database URL:
+   ```bash
+   turso db show arkestra-db --url
+   ```
+5. Get the auth token:
+   ```bash
+   turso db tokens create arkestra-db
+   ```
+
+#### Step 2: Configure Environment Variables in Vercel
+
+1. Go to your Vercel project dashboard
+2. Navigate to **Settings** → **Environment Variables**
+3. Add the following variables:
+
+| Name | Value | Environments |
+|------|-------|--------------|
+| `DATABASE_URL` | `libsql://arkestra-db-your-username.turso.io` | Production, Preview, Development |
+| `TURSO_DATABASE_AUTH_TOKEN` | `<your-turso-auth-token>` | Production, Preview, Development |
+| `NEXTAUTH_URL` | `https://your-app.vercel.app` | Production, Preview, Development |
+| `NEXTAUTH_SECRET` | `<generate-at-https://generate-secret.vercel.app/>` | Production, Preview, Development |
+
+#### Step 3: Push Schema to Turso
+
+1. Update your `prisma/schema.prisma` to use Turso:
+   ```prisma
+   datasource db {
+     provider = "sqlite"
+     url      = env("DATABASE_URL")
+     directUrl = env("DATABASE_URL")
+   }
+   ```
+
+2. Push the schema to Turso:
+   ```bash
+   DATABASE_URL="libsql://arkestra-db.turso.io" TURSO_DATABASE_AUTH_TOKEN="your-token" npx prisma db push
+   ```
+
+3. Seed the database:
+   ```bash
+   DATABASE_URL="libsql://arkestra-db.turso.io" TURSO_DATABASE_AUTH_TOKEN="your-token" npx prisma db seed
+   ```
+
+#### Step 4: Redeploy
+
+After adding environment variables, go to the **Deployments** tab and click **Redeploy** on the latest deployment.
+
+### Alternative: Vercel Postgres
+
+If you prefer PostgreSQL over SQLite, you can use Vercel Postgres:
+
+1. In Vercel dashboard, go to **Storage** → **Create Database** → **Vercel Postgres**
+2. Connect it to your project
+3. Update `prisma/schema.prisma`:
+   ```prisma
+   datasource db {
+     provider = "postgresql"
+     url      = env("POSTGRES_URL")
+   }
+   ```
+4. Set the environment variable `POSTGRES_URL` in Vercel (auto-set when you create the database)
 
 ## Project Structure
 
@@ -106,13 +174,21 @@ Arkestra/
 ├── src/
 │   ├── app/
 │   │   ├── api/          # API routes
-│   │   ├── (auth)/       # Auth pages
-│   │   ├── (main)/       # Main app pages
-│   │   └── page.tsx      # Root page
+│   │   ├── dashboard/    # Dashboard page
+│   │   ├── events/       # Event management
+│   │   ├── members/      # Member management
+│   │   ├── bookings/     # Booking management
+│   │   ├── payments/     # Payment tracking
+│   │   ├── clients/      # Client CRM
+│   │   ├── repertoire/   # Repertoire library
+│   │   ├── notifications/# Notifications
+│   │   ├── calendar/     # Calendar view
+│   │   ├── login/        # Login page
+│   │   └── page.tsx      # Landing page
 │   ├── components/
 │   │   ├── ui/           # Reusable UI components
-│   │   ├── layout/       # Layout components
-│   │   └── features/      # Feature-specific components
+│   │   ├── AppLayout.tsx # Main layout with sidebar
+│   │   └── Sidebar.tsx   # Navigation sidebar
 │   └── lib/
 │       ├── auth.ts       # NextAuth configuration
 │       └── prisma.ts     # Prisma client
@@ -121,17 +197,6 @@ Arkestra/
 ├── tailwind.config.js
 └── tsconfig.json
 ```
-
-## Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm start` | Start production server |
-| `npm run lint` | Run ESLint |
-| `npx prisma studio` | Open Prisma Studio |
-| `npx prisma db seed` | Seed database |
 
 ## API Routes
 
@@ -149,23 +214,16 @@ Arkestra/
 | `/api/notifications` | Notifications |
 | `/api/stats` | Dashboard statistics |
 
-## Deployment
+## Available Scripts
 
-This application can be deployed to platforms that support Node.js:
-
-### Vercel (Recommended)
-```bash
-npm i -g vercel
-vercel
-```
-
-### Railway
-Connect your GitHub repository to Railway for automatic deployment.
-
-### Render
-Create a Web Service and configure:
-- Build Command: `npm run build`
-- Start Command: `npm start`
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm start` | Start production server |
+| `npx prisma studio` | Open Prisma Studio |
+| `npx prisma db push` | Push schema to database |
+| `npx prisma db seed` | Seed database with sample data |
 
 ## License
 

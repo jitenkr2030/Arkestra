@@ -13,42 +13,55 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Invalid credentials')
+          throw new Error('Email and password are required')
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-          include: {
-            member: true,
-            client: true,
-          },
-        })
-
-        if (!user) {
-          throw new Error('User not found')
+        // Check if database is configured
+        if (!process.env.DATABASE_URL) {
+          throw new Error('Database not configured. Please contact the administrator.')
         }
 
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+            include: {
+              member: true,
+              client: true,
+            },
+          })
 
-        if (!isPasswordValid) {
-          throw new Error('Invalid password')
-        }
+          if (!user) {
+            throw new Error('Invalid email or password')
+          }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          member: user.member ? {
-            id: user.member.id,
-            instrument: user.member.instrument,
-            position: user.member.position || undefined,
-            hourlyRate: user.member.hourlyRate,
-          } : null,
-          client: user.client ? {
-            id: user.client.id,
-            company: user.client.company || undefined,
-          } : null,
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+
+          if (!isPasswordValid) {
+            throw new Error('Invalid email or password')
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            member: user.member ? {
+              id: user.member.id,
+              instrument: user.member.instrument,
+              position: user.member.position || undefined,
+              hourlyRate: user.member.hourlyRate,
+            } : null,
+            client: user.client ? {
+              id: user.client.id,
+              company: user.client.company || undefined,
+            } : null,
+          }
+        } catch (error: any) {
+          // Handle Prisma errors gracefully
+          if (error.code === 'P1001' || error.message?.includes('DATABASE_URL')) {
+            throw new Error('Database connection error. Please try again later.')
+          }
+          throw error
         }
       },
     }),
@@ -75,6 +88,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/login',
+    error: '/login',
   },
   session: {
     strategy: 'jwt',
