@@ -168,8 +168,8 @@ async function main() {
   const event2 = await prisma.event.create({
     data: {
       orchestraId: orchestra.id,
-      title: 'Beethoven\'s Fifth Symphony',
-      description: 'Performance of Beethoven\'s iconic symphony.',
+      title: "Beethoven's Fifth Symphony",
+      description: "Performance of Beethoven's iconic symphony.",
       eventType: 'PERFORMANCE',
       location: 'Metropolitan Theater',
       startTime: new Date('2026-05-20T20:00:00'),
@@ -220,17 +220,27 @@ async function main() {
 
   console.log('Created events')
 
-  // Create repertoire for events
-  await prisma.repertoire.createMany({
-    data: [
-      { eventId: event1.id, title: 'Symphony No. 40 in G minor', composer: 'Wolfgang Amadeus Mozart', duration: 30, arrangement: 'Full Orchestra' },
-      { eventId: event1.id, title: 'Symphony No. 5 in C minor', composer: 'Ludwig van Beethoven', duration: 35, arrangement: 'Full Orchestra' },
-      { eventId: event1.id, title: 'Overture to William Tell', composer: 'Gioachino Rossini', duration: 12, arrangement: 'Full Orchestra' },
-      { eventId: event2.id, title: 'Symphony No. 5 in C minor', composer: 'Ludwig van Beethoven', duration: 35, arrangement: 'Full Orchestra' },
-      { eventId: event2.id, title: 'Piano Concerto No. 21', composer: 'Wolfgang Amadeus Mozart', duration: 28, arrangement: 'Piano and Orchestra' },
-      { eventId: event3.id, title: 'Symphony No. 40 - Movement 1', composer: 'Wolfgang Amadeus Mozart', duration: 8, notes: 'Focus on exposition' },
-      { eventId: event4.id, title: 'String Quartet Op. 76 No. 2', composer: 'Franz Joseph Haydn', duration: 20, arrangement: 'String Quartet' },
-    ],
+  // Create repertoire for events - using individual creates for SQLite compatibility
+  await prisma.repertoire.create({
+    data: { eventId: event1.id, title: 'Symphony No. 40 in G minor', composer: 'Wolfgang Amadeus Mozart', duration: 30, arrangement: 'Full Orchestra' },
+  })
+  await prisma.repertoire.create({
+    data: { eventId: event1.id, title: 'Symphony No. 5 in C minor', composer: 'Ludwig van Beethoven', duration: 35, arrangement: 'Full Orchestra' },
+  })
+  await prisma.repertoire.create({
+    data: { eventId: event1.id, title: 'Overture to William Tell', composer: 'Gioachino Rossini', duration: 12, arrangement: 'Full Orchestra' },
+  })
+  await prisma.repertoire.create({
+    data: { eventId: event2.id, title: 'Symphony No. 5 in C minor', composer: 'Ludwig van Beethoven', duration: 35, arrangement: 'Full Orchestra' },
+  })
+  await prisma.repertoire.create({
+    data: { eventId: event2.id, title: 'Piano Concerto No. 21', composer: 'Wolfgang Amadeus Mozart', duration: 28, arrangement: 'Piano and Orchestra' },
+  })
+  await prisma.repertoire.create({
+    data: { eventId: event3.id, title: 'Symphony No. 40 - Movement 1', composer: 'Wolfgang Amadeus Mozart', duration: 8, notes: 'Focus on exposition' },
+  })
+  await prisma.repertoire.create({
+    data: { eventId: event4.id, title: 'String Quartet Op. 76 No. 2', composer: 'Franz Joseph Haydn', duration: 20, arrangement: 'String Quartet' },
   })
 
   console.log('Created repertoire')
@@ -319,16 +329,24 @@ async function main() {
 
   console.log('Created bookings')
 
-  // Create payments
-  await prisma.payment.createMany({
-    data: [
-      { bookingId: booking1.id, amount: 225.00, paymentDate: new Date('2026-05-10'), paymentMethod: 'BANK_TRANSFER', reference: 'TRF-2026-001' },
-      { bookingId: booking2.id, amount: 240.00, paymentDate: new Date('2026-05-10'), paymentMethod: 'BANK_TRANSFER', reference: 'TRF-2026-002' },
-      { bookingId: booking3.id, amount: 70.00, paymentDate: new Date('2026-05-12'), paymentMethod: 'CARD', reference: 'CARD-2026-001' },
-      { bookingId: booking6.id, amount: 195.00, paymentDate: new Date('2026-05-01'), paymentMethod: 'CASH', reference: 'CASH-2026-001' },
-      { bookingId: booking7.id, amount: 225.00, paymentDate: new Date('2026-06-01'), paymentMethod: 'BANK_TRANSFER', reference: 'TRF-2026-010' },
-      { bookingId: booking8.id, amount: 140.00, paymentDate: new Date('2026-06-01'), paymentMethod: 'BANK_TRANSFER', reference: 'TRF-2026-011' },
-    ],
+  // Create payments - using individual creates for SQLite compatibility
+  await prisma.payment.create({
+    data: { bookingId: booking1.id, amount: 225.00, paymentDate: new Date('2026-05-10'), paymentMethod: 'BANK_TRANSFER', reference: 'TRF-2026-001' },
+  })
+  await prisma.payment.create({
+    data: { bookingId: booking2.id, amount: 240.00, paymentDate: new Date('2026-05-10'), paymentMethod: 'BANK_TRANSFER', reference: 'TRF-2026-002' },
+  })
+  await prisma.payment.create({
+    data: { bookingId: booking3.id, amount: 70.00, paymentDate: new Date('2026-05-12'), paymentMethod: 'CARD', reference: 'CARD-2026-001' },
+  })
+  await prisma.payment.create({
+    data: { bookingId: booking6.id, amount: 195.00, paymentDate: new Date('2026-05-01'), paymentMethod: 'CASH', reference: 'CASH-2026-001' },
+  })
+  await prisma.payment.create({
+    data: { bookingId: booking7.id, amount: 225.00, paymentDate: new Date('2026-06-01'), paymentMethod: 'BANK_TRANSFER', reference: 'TRF-2026-010' },
+  })
+  await prisma.payment.create({
+    data: { bookingId: booking8.id, amount: 140.00, paymentDate: new Date('2026-06-01'), paymentMethod: 'BANK_TRANSFER', reference: 'TRF-2026-011' },
   })
 
   console.log('Created payments')
@@ -358,48 +376,86 @@ async function main() {
 
   console.log('Created clients')
 
-  // Create notifications
-  await prisma.notification.createMany({
-    data: [
-      { userId: adminUser.id, type: 'BOOKING', title: 'New Booking Request', message: 'Michael Chen has a pending booking for Spring Symphony Gala.', read: false, relatedId: booking4.id },
-      { userId: memberUser1.id, type: 'EVENT', title: 'Event Reminder', message: 'Spring Symphony Gala is in 11 days. Please confirm your availability.', read: false, relatedId: event1.id },
-      { userId: memberUser2.id, type: 'PAYMENT', title: 'Payment Received', message: 'Your payment of $240.00 has been processed.', read: true, relatedId: booking2.id },
-      { userId: memberUser3.id, type: 'BOOKING', title: 'Booking Confirmed', message: 'Your booking for Spring Symphony Gala has been confirmed.', read: false, relatedId: booking3.id },
-      { userId: adminUser.id, type: 'SYSTEM', title: 'System Update', message: 'Orchestra profile has been updated successfully.', read: true },
-    ],
+  // Create notifications - using individual creates for SQLite compatibility
+  await prisma.notification.create({
+    data: { userId: adminUser.id, type: 'BOOKING', title: 'New Booking Request', message: 'Michael Chen has a pending booking for Spring Symphony Gala.', read: false, relatedId: booking4.id },
+  })
+  await prisma.notification.create({
+    data: { userId: memberUser1.id, type: 'EVENT', title: 'Event Reminder', message: 'Spring Symphony Gala is in 11 days. Please confirm your availability.', read: false, relatedId: event1.id },
+  })
+  await prisma.notification.create({
+    data: { userId: memberUser2.id, type: 'PAYMENT', title: 'Payment Received', message: 'Your payment of $240.00 has been processed.', read: true, relatedId: booking2.id },
+  })
+  await prisma.notification.create({
+    data: { userId: memberUser3.id, type: 'BOOKING', title: 'Booking Confirmed', message: 'Your booking for Spring Symphony Gala has been confirmed.', read: false, relatedId: booking3.id },
+  })
+  await prisma.notification.create({
+    data: { userId: adminUser.id, type: 'SYSTEM', title: 'System Update', message: 'Orchestra profile has been updated successfully.', read: true },
   })
 
   console.log('Created notifications')
 
-  // Create availability
-  await prisma.availability.createMany({
-    data: [
-      // Member 1 availability
-      { memberId: member1.id, date: new Date('2026-05-05'), status: 'AVAILABLE' },
-      { memberId: member1.id, date: new Date('2026-05-06'), status: 'AVAILABLE' },
-      { memberId: member1.id, date: new Date('2026-05-15'), status: 'AVAILABLE' },
-      { memberId: member1.id, date: new Date('2026-05-16'), status: 'UNAVAILABLE', reason: 'Personal commitment' },
-      { memberId: member1.id, date: new Date('2026-05-20'), status: 'AVAILABLE' },
-      { memberId: member1.id, date: new Date('2026-05-21'), status: 'TENTATIVE', reason: 'May have other gig' },
-      
-      // Member 2 availability
-      { memberId: member2.id, date: new Date('2026-05-05'), status: 'AVAILABLE' },
-      { memberId: member2.id, date: new Date('2026-05-15'), status: 'AVAILABLE' },
-      { memberId: member2.id, date: new Date('2026-05-20'), status: 'AVAILABLE' },
-      { memberId: member2.id, date: new Date('2026-05-25'), status: 'UNAVAILABLE', reason: 'Vacation' },
-      
-      // Member 3 availability
-      { memberId: member3.id, date: new Date('2026-05-05'), status: 'AVAILABLE' },
-      { memberId: member3.id, date: new Date('2026-05-15'), status: 'AVAILABLE' },
-      { memberId: member3.id, date: new Date('2026-05-20'), status: 'TENTATIVE' },
-      { memberId: member3.id, date: new Date('2026-06-10'), status: 'AVAILABLE' },
-      
-      // Member 4 availability
-      { memberId: member4.id, date: new Date('2026-05-05'), status: 'AVAILABLE' },
-      { memberId: member4.id, date: new Date('2026-05-06'), status: 'AVAILABLE' },
-      { memberId: member4.id, date: new Date('2026-05-15'), status: 'TENTATIVE' },
-      { memberId: member4.id, date: new Date('2026-05-25'), status: 'AVAILABLE' },
-    ],
+  // Create availability - using individual creates for SQLite compatibility
+  // Member 1 availability
+  await prisma.availability.create({
+    data: { memberId: member1.id, date: new Date('2026-05-05'), status: 'AVAILABLE' },
+  })
+  await prisma.availability.create({
+    data: { memberId: member1.id, date: new Date('2026-05-06'), status: 'AVAILABLE' },
+  })
+  await prisma.availability.create({
+    data: { memberId: member1.id, date: new Date('2026-05-15'), status: 'AVAILABLE' },
+  })
+  await prisma.availability.create({
+    data: { memberId: member1.id, date: new Date('2026-05-16'), status: 'UNAVAILABLE', reason: 'Personal commitment' },
+  })
+  await prisma.availability.create({
+    data: { memberId: member1.id, date: new Date('2026-05-20'), status: 'AVAILABLE' },
+  })
+  await prisma.availability.create({
+    data: { memberId: member1.id, date: new Date('2026-05-21'), status: 'TENTATIVE', reason: 'May have other gig' },
+  })
+
+  // Member 2 availability
+  await prisma.availability.create({
+    data: { memberId: member2.id, date: new Date('2026-05-05'), status: 'AVAILABLE' },
+  })
+  await prisma.availability.create({
+    data: { memberId: member2.id, date: new Date('2026-05-15'), status: 'AVAILABLE' },
+  })
+  await prisma.availability.create({
+    data: { memberId: member2.id, date: new Date('2026-05-20'), status: 'AVAILABLE' },
+  })
+  await prisma.availability.create({
+    data: { memberId: member2.id, date: new Date('2026-05-25'), status: 'UNAVAILABLE', reason: 'Vacation' },
+  })
+
+  // Member 3 availability
+  await prisma.availability.create({
+    data: { memberId: member3.id, date: new Date('2026-05-05'), status: 'AVAILABLE' },
+  })
+  await prisma.availability.create({
+    data: { memberId: member3.id, date: new Date('2026-05-15'), status: 'AVAILABLE' },
+  })
+  await prisma.availability.create({
+    data: { memberId: member3.id, date: new Date('2026-05-20'), status: 'TENTATIVE' },
+  })
+  await prisma.availability.create({
+    data: { memberId: member3.id, date: new Date('2026-06-10'), status: 'AVAILABLE' },
+  })
+
+  // Member 4 availability
+  await prisma.availability.create({
+    data: { memberId: member4.id, date: new Date('2026-05-05'), status: 'AVAILABLE' },
+  })
+  await prisma.availability.create({
+    data: { memberId: member4.id, date: new Date('2026-05-06'), status: 'AVAILABLE' },
+  })
+  await prisma.availability.create({
+    data: { memberId: member4.id, date: new Date('2026-05-15'), status: 'TENTATIVE' },
+  })
+  await prisma.availability.create({
+    data: { memberId: member4.id, date: new Date('2026-05-25'), status: 'AVAILABLE' },
   })
 
   console.log('Created availability')
